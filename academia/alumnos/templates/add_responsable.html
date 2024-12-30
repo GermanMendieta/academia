@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h2>Responsables Registrados</h2>
+        <hr />
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">{{ error_message }}</div>
+        {% endif %}
+        <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#responsableModal" onclick="clearModalFields()">
+            Agregar Responsable
+        </button>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Cédula</th>
+                    <th>Teléfono</th>
+                    <th>Correo Electrónico</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for responsable in responsables %}
+                    <tr>
+                        <td>{{ responsable.nombre }}</td>
+                        <td>{{ responsable.cedula }}</td>
+                        <td>{{ responsable.telefono }}</td>
+                        <td>{{ responsable.correo_electronico }}</td>
+                        <td>
+                            <a href="#" class="btn btn-outline-dark btn-sm" onclick="loadResponsableData('{{ responsable.id }}')" data-toggle="modal" data-target="#responsableModal">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form method="post" action="{% url 'alumnos:delete_responsable' responsable.id %}" style="display:inline;" onsubmit="return confirmDelete()">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="responsableModal" tabindex="-1" role="dialog" aria-labelledby="responsableModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="responsableModalLabel">Agregar/Editar Responsable</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{% url 'alumnos:add_responsable' %}" id="responsableFormModal" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="id" id="modalResponsableId">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                {{ form.nombre.label_tag }}
+                                {{ form.nombre }}
+                                <div class="invalid-feedback">
+                                    Por favor ingrese un nombre válido.
+                                </div>
+                            </div>
+                            <div class="form-group col-md-6">
+                                {{ form.cedula.label_tag }}
+                                {{ form.cedula }}
+                                <div class="invalid-feedback">
+                                    Por favor ingrese una cédula válida.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                {{ form.telefono.label_tag }}
+                                {{ form.telefono }}
+                                <div class="invalid-feedback">
+                                    Por favor ingrese un teléfono válido.
+                                </div>
+                            </div>
+                            <div class="form-group col-md-6">
+                                {{ form.correo_electronico.label_tag }}
+                                {{ form.correo_electronico }}
+                                <div class="invalid-feedback">
+                                    Por favor ingrese un correo electrónico válido.
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        } else {
+                            var confirmation = confirm('¿Está seguro de que desea guardar los cambios?');
+                            if (!confirmation) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+
+        function loadResponsableData(id) {
+            var responsables = JSON.parse('{{ responsables_json|escapejs }}');
+            var responsable = responsables.find(responsable => responsable.id == id);
+
+            if (responsable) {
+                document.getElementById('modalResponsableId').value = responsable.id;
+                document.getElementById('id_nombre').value = responsable.nombre;
+                document.getElementById('id_cedula').value = responsable.cedula;
+                document.getElementById('id_telefono').value = responsable.telefono;
+                document.getElementById('id_correo_electronico').value = responsable.correo_electronico;
+            }
+        }
+
+        function clearModalFields() {
+            document.getElementById('modalResponsableId').value = '';
+            document.getElementById('id_nombre').value = '';
+            document.getElementById('id_cedula').value = '';
+            document.getElementById('id_telefono').value = '';
+            document.getElementById('id_correo_electronico').value = '';
+        }
+
+        function confirmDelete() {
+            return confirm('¿Está seguro de que desea eliminar este responsable?');
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h2>Asociar Responsables a Alumnos</h2>
+        <hr />
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="alumnos">Seleccionar Alumnos:</label>
+                <select multiple class="form-control" id="alumnos" name="alumnos" required>
+                    {% for alumno in alumnos %}
+                        <option value="{{ alumno.id }}">{{ alumno.nombre }}</option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">
+                    Por favor seleccione al menos un alumno.
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="responsables">Seleccionar Responsables:</label>
+                <select multiple class="form-control" id="responsables" name="responsables" required>
+                    {% for responsable in responsables %}
+                        <option value="{{ responsable.id }}">{{ responsable.nombre }}</option>
+                    {% endfor %}
+                </select>
+                <div class="invalid-feedback">
+                    Por favor seleccione al menos un responsable.
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Asociar</button>
+        </form>
+
+        <hr />
+        <h3>Relaciones Existentes</h3>
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>Alumno</th>
+                    <th>Responsable</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for relacion in relaciones %}
+                    <tr>
+                        <td>{{ relacion.alumno.nombre }}</td>
+                        <td>{{ relacion.responsable.nombre }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        } else {
+                            var confirmacion = confirm('¿Está seguro de que desea asociar los responsables seleccionados a los alumnos seleccionados?');
+                            if (!confirmacion) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+{% endblock %}

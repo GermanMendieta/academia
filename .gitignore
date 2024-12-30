@@ -95,3 +95,9 @@ celerybeat-schedule.*
 # vscode
 .vscode/
 
+# Django migrations
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+**[0-9][0-9]*.py

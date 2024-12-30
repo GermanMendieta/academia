@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container mt-5">
+    <h2>Alumnos</h2>
+    <hr />
+    {% if error_message %}
+      <div class="alert alert-danger" role="alert">{{ error_message }}</div>
+    {% endif %}
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#alumnoModal">
+      Agregar Alumno
+    </button>
+    <hr />
+    <h3>Lista de Alumnos</h3>
+    <form method="post" action="{% url 'alumnos:multiple_selected' %}">
+      {% csrf_token %}
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">
+              <input type="checkbox" id="select-all" />
+            </th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Cédula</th>
+            <th scope="col">Edad</th>
+            <th scope="col">Correo Electrónico</th>
+            <th scope="col">Dirección</th>
+            <th scope="col">Teléfono</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for alumno in alumnos %}
+            <tr>
+              <td>
+                <input type="checkbox" name="ids" value="{{ alumno.id }}" />
+              </td>
+              <td>{{ alumno.nombre }}</td>
+              <td>{{ alumno.cedula }}</td>
+              <td>{{ alumno.edad }}</td>
+              <td>{{ alumno.correo_electronico }}</td>
+              <td>{{ alumno.direccion }}</td>
+              <td>{{ alumno.telefono }}</td>
+              <td>{{ alumno.estado|yesno:'Activo,Inactivo' }}</td>
+              <td>
+                <a href="#" class="btn btn-warning btn-sm" onclick="loadAlumnoData('{{ alumno.id }}')" data-toggle="modal" data-target="#alumnoModal">Editar</a>
+                <form method="post" action="{% url 'alumnos:delete_alumno' alumno.id %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="form-group">
+        <label for="actionType">Acción:</label>
+        <select name="actionType" id="actionType" class="form-control">
+          <option value="deactivate">Desactivar</option>
+          <option value="activate">Activar</option>
+          <option value="delete">Eliminar</option>
+          <option value="associate">Asociar Responsables</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Aplicar</button>
+    </form>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="alumnoModal" tabindex="-1" role="dialog" aria-labelledby="alumnoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="alumnoModalLabel">Agregar/Editar Alumno</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form method="post" action="{% url 'alumnos:alumnos_view' %}" id="alumnoForm">
+            {% csrf_token %}
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                {{ form.nombre.label_tag }}
+                {{ form.nombre }}<input type="hidden" name="id" id="alumnoId">
+              </div>
+              <div class="form-group col-md-6">
+                {{ form.cedula.label_tag }}
+                {{ form.cedula }}
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-4">
+                {{ form.edad.label_tag }}
+                {{ form.edad }}
+              </div>
+              <div class="form-group col-md-8">
+                {{ form.correo_electronico.label_tag }}
+                {{ form.correo_electronico }}
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-12">
+                {{ form.direccion.label_tag }}
+                {{ form.direccion }}
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                {{ form.telefono.label_tag }}
+                {{ form.telefono }}
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('select-all').onclick = function () {
+      var checkboxes = document.getElementsByName('ids')
+      for (var checkbox of checkboxes) {
+        checkbox.checked = this.checked
+      }
+    }
+
+    function loadAlumnoData(id) {
+      
+      var alumnos = JSON.parse('{{ alumnos_json|escapejs }}');
+      var alumno = alumnos.find(alumno => alumno.id == id);
+
+      if (alumno) {
+        document.getElementById('alumnoId').value = alumno.id;
+        document.getElementById('id_nombre').value = alumno.nombre;
+        document.getElementById('id_cedula').value = alumno.cedula;
+        document.getElementById('id_edad').value = alumno.edad;
+        document.getElementById('id_correo_electronico').value = alumno.correo_electronico;
+        document.getElementById('id_direccion').value = alumno.direccion;
+        document.getElementById('id_telefono').value = alumno.telefono;
+      }
+    }
+  </script>
+{% endblock %}
